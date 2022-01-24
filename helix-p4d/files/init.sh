@@ -1,24 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
 # Setup directories
 mkdir -p $P4ROOT
 mkdir -p $P4DEPOTS
 mkdir -p $P4CKP
 mkdir -p $P4LOGDIR
+chown -R perforce:perforce $P4HOME
 
-# Restore checkpoint if symlink latest exists
-if [ -L $P4CKP/latest ]; then
-    echo "Restoring checkpoint..."
-	restore.sh
-	rm $P4CKP/latest
-else
-	echo "Create empty or start existing server..."
-	empty_setup.sh
-fi
-
-echo "Perforce Server starting..."
-until p4 info -s 2> /dev/null; do sleep 1; done
-echo "Perforce Server [RUNNING]"
-
-## Remove all triggers
-echo "Triggers:" | p4 triggers -i
+# Ensure server is Unicode
+sudo -E -u perforce p4d $P4CASE -r$P4ROOT -p$P4TCP -L$P4LOG -J$P4JOURNAL -xi
+# Start p4d
+sudo -E -u perforce p4d $P4CASE -r$P4ROOT -p$P4TCP -L$P4LOG -J$P4JOURNAL

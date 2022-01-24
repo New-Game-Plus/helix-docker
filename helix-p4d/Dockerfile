@@ -55,36 +55,17 @@ ENV P4ROOT=$P4HOME/root \
 # Create perforce user and install Perforce Server
 RUN \
   apt-get install -y helix-p4d && \
-  apt-get install -y helix-swarm-triggers
+  apt-get install -y helix-swarm-triggers && \
+  apt-get install -y sudo
 
 # Add external files
-COPY files/clean.sh /usr/local/bin/clean.sh
-COPY files/restore.sh /usr/local/bin/restore.sh
-COPY files/empty_setup.sh /usr/local/bin/empty_setup.sh
 COPY files/init.sh /usr/local/bin/init.sh
-COPY files/latest_checkpoint.sh /usr/local/bin/latest_checkpoint.sh
 
 RUN \
-  chmod +x /usr/local/bin/clean.sh && \
-  chmod +x /usr/local/bin/restore.sh && \
-  chmod +x /usr/local/bin/empty_setup.sh && \
-  chmod +x /usr/local/bin/init.sh && \
-  chmod +x /usr/local/bin/latest_checkpoint.sh
+  chmod +x /usr/local/bin/init.sh
 
 # Expose Perforce; TCP port and volumes
 EXPOSE $P4TCP
 VOLUME $P4HOME
 
-
-# --------------------------------------------------------------------------------
-# Docker RUN
-# --------------------------------------------------------------------------------
-
-ENTRYPOINT \
-  init.sh && \
-  bash
-
-HEALTHCHECK \
-  --interval=2m \
-  --timeout=10s \
-  CMD p4 info -s > /dev/null || exit 1
+CMD /usr/local/bin/init.sh
